@@ -1,0 +1,83 @@
+==Welcome to Units
+
+This is a package for people who want units with their numbers. For all of the conversions provided in units/standard, please see Numeric.
+
+== Install
+
+* gem install woahdae-units
+
+==Basic Usage
+
+    require 'units/standard'
+    1.lb.to_ounces # => 16.0
+    
+===Currency (currently broken)
+
+    require 'units/currency'
+    1.euro.usd # => 1.2545
+    
+    1.usd.unit # => :usd
+    1.usd.to_yen # => 108.9 # this information is grabbed on the fly via a SOAP call
+    1.usd.to_yet.unit # => :yen
+
+==Comparing Units with Rails' ActiveSupport
+
+    # What Rails' ActiveSupport does
+    # =====
+    1.hour # => 3600
+    1.hour.to_i # => 3600
+    1.hour.minutes # => 216000 <-- This is non-sense
+    1.hour.hour # => 12960000  <-- This is even more non-sense
+
+    # What Units does
+    # =====
+    1.hour # => 1
+    1.hour.unit # => :hours
+    1.hour.to_i # => 3600
+    1.hour.to_seconds # => 3600
+    1.hour.to_minutes # => 60
+    1.hour.to_hours # => 1 <-- this makes sense, there is 1 hour in an hour
+    1.foot.to_inches # => 12
+
+== How to Write Your Own Conversions
+    class Numeric
+      # Choose an arbitrary unit to be 1.0 and provide conversions for the other units
+      # =====
+      add_unit_conversions( :weight => {
+            :pounds     =>  1.0,
+            :ounces     =>  0.0625,
+            :kilograms  =>  0.45359237
+          }
+        )
+      
+      # This is optional and for convenience only
+      # =====
+      add_unit_aliases( :weight => {
+            :pounds     => [ :pound, :lb, :lbs ],
+            :ounces     => [ :ounce, :oz ],
+            :kilograms  => [ :kilogram, :kg, kgs ]
+          }
+        )
+      
+      # Add dynamic lookups
+      add_unit_conversions :currency => :lookup_currency
+
+      def lookup_currency(old, new)
+        # return conversion from SOAP calls
+      end
+
+      def lookup_currency_include?(unit)
+        # check if a unit is a valid conversion externally
+      end
+    end
+
+    1.pound.to_ounces # => 16.0
+
+== Authors    
+* Lucas Carlson  (mailto:lucas@rufy.com)
+* John Butler (mailto:john@likealightbulb.com)
+
+== Contributors
+* Woody Peterson
+
+This library is released under the terms of the BSD license. See LICENSE for more details.
